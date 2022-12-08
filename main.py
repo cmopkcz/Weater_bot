@@ -2,7 +2,7 @@
 #import datetime
 #import aiogram
 #import requests
-
+import time
 
 from aiogram import Bot, types
 from aiogram.dispatcher import Dispatcher
@@ -44,18 +44,21 @@ async def get_weather(message : types.Message):
         current_humidity = data["main"]["humidity"]
         current_visibility = data["visibility"]
         current_wind = data["wind"]["speed"]
-        current_sunrise = datetime.datetime.fromtimestamp(data["sys"]["sunrise"])
-        current_sunset = datetime.datetime.fromtimestamp(data["sys"]["sunset"])
+        current_sunrise = datetime.datetime.fromtimestamp((data["sys"]["sunrise"]) + 18000 + data["timezone"])
+        current_sunset = datetime.datetime.fromtimestamp((data["sys"]["sunset"]) + 18000 + data["timezone"])
         current_length_day = current_sunset - current_sunrise
+        time_UTC = time.time() + 18000 + data["timezone"]
+
 
         weather_discription = data["weather"][0]["main"]
+
 
         if weather_discription in code_for_smile:
             wd = code_for_smile[weather_discription]
         else:
             wd = "Посмотри сам, я не пойму что там!"
 
-        await message.reply(f"****{datetime.datetime.now().strftime('%d-%m-%Y %H:%M')}***\n"
+        await message.answer(f"****{datetime.datetime.fromtimestamp(time_UTC).strftime('%d-%m-%Y %H:%M')}***\n"
               f"Погода в: {name}\n"
               f"Температура: {current_temp}°C {wd}\n"
               f"Влажность: {current_humidity}%\n"
@@ -63,13 +66,15 @@ async def get_weather(message : types.Message):
               f"Скорость ветра: {current_wind} м/сек\n"
               f"Видимость: {current_visibility} м\n"
               f"Восход солнца: {current_sunrise.time()}\n"
+              f"Заход солнца: {current_sunset.time()}\n"               
               f"Продолжительность дня: {current_length_day}\n"
               f"Счастливого пути!"
              )
+        await message.delete()
 
     except Exception as ex:
-        await message.reply(message.text)
-        await message.reply('Проверь название города')
+        await message.reply(f'Проверь название города 🤷')
+        await message.delete()
 
 
 if __name__ == '__main__':
