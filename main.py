@@ -4,26 +4,37 @@
 #import requests
 import time
 
-from aiogram import Bot, types
+from aiogram import Bot
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
 from config import API_KEY
 from config import API_KEY_WEATHER
 import datetime
 import requests
+from aiogram.types import Message, Location, KeyboardButton, ReplyKeyboardMarkup
 import json, string
 
 bot: Bot = Bot(token=API_KEY)
 dp = Dispatcher(bot)
+b1 = KeyboardButton('location', request_location=True)
+kb_client = ReplyKeyboardMarkup(resize_keyboard=True)
 
+kb_client.add(b1)
 
 @dp.message_handler(commands=["start", "help"])
-async def start_help(message :types.Message):
-    await message.reply('Напиши название города!')
+async def start_help(message : Message):
+    await message.reply('Напиши название города!', reply_markup=kb_client)
+
+#@dp.message_handler(commands=['location'])
+
 
 @dp.message_handler()
-async def get_weather(message : types.Message):
+async def get_location(message : Location):
+    print(message)
+    print(message.longitude, message.latitude)
+    await bot.send_message(chat_id=admin_id, text="location is delivered")
 
+async def get_weather(message : Message):
     code_for_smile = {
         "Clear" : "Ясно \U00002600",
         "Clouds" : "Облачно \U00002601",
